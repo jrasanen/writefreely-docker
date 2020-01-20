@@ -17,7 +17,7 @@ steps:
     image: plugins/docker
     settings:
       repo: algernon/writefreely
-      tags: latest
+      auto_tag: true
       username:
         from_secret: docker_username
       password:
