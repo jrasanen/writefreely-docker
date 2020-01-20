@@ -23,4 +23,7 @@ steps:
       password:
         from_secret: docker_password
     when:
-      branch: master
+      ref:
+        include:
+          - refs/heads/master
+          - refs/tags/**
