@@ -18,25 +18,26 @@
 FROM golang:1.13-alpine as build
 
 ARG WRITEFREELY_VERSION=v0.11.2
+ARG WRITEFREELY_FORK=writeas/writefreely
 
 RUN apk add --update nodejs nodejs-npm make g++ git sqlite-dev
 RUN npm install -g less less-plugin-clean-css
 RUN go get -u github.com/jteeuwen/go-bindata/...
 
-RUN mkdir -p /go/src/github.com/writeas
-RUN git clone https://github.com/writeas/writefreely.git /go/src/github.com/writeas/writefreely -b ${WRITEFREELY_VERSION}
-WORKDIR /go/src/github.com/writeas/writefreely
+RUN mkdir -p /go/src/github.com/${WRITEFREELY_FORK}
+RUN git clone https://github.com/${WRITEFREELY_FORK}.git /go/src/github.com/${WRITEFREELY_FORK} -b ${WRITEFREELY_VERSION}
+WORKDIR /go/src/github.com/${WRITEFREELY_FORK}
 
 ENV GO111MODULE=on
 RUN make build \
   && make ui
 RUN mkdir /stage && \
   cp -R /go/bin \
-  /go/src/github.com/writeas/writefreely/templates \
-  /go/src/github.com/writeas/writefreely/static \
-  /go/src/github.com/writeas/writefreely/pages \
-  /go/src/github.com/writeas/writefreely/keys \
-  /go/src/github.com/writeas/writefreely/cmd \
+  /go/src/github.com/${WRITEFREELY_FORK}/templates \
+  /go/src/github.com/${WRITEFREELY_FORK}/static \
+  /go/src/github.com/${WRITEFREELY_FORK}/pages \
+  /go/src/github.com/${WRITEFREELY_FORK}/keys \
+  /go/src/github.com/${WRITEFREELY_FORK}/cmd \
   /stage && \
   mv /stage/cmd/writefreely/writefreely /stage
 
