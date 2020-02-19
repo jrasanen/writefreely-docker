@@ -1,5 +1,5 @@
 ## Writefreely Docker image
-## Copyright (C) 2019 Gergely Nagy
+## Copyright (C) 2019, 2020 Gergely Nagy
 ##
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -15,18 +15,36 @@
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Build image
-FROM debian:stable-slim AS build
+FROM golang:1.13-alpine as build
 
-ARG WRITEFREELY_VERSION=0.11.2
+ARG WRITEFREELY_VERSION=v0.11.2
 
-RUN apt update
-RUN apt install --no-install-recommends -y curl ca-certificates
-RUN curl -L https://github.com/writeas/writefreely/releases/download/v${WRITEFREELY_VERSION}/writefreely_${WRITEFREELY_VERSION}_linux_amd64.tar.gz | tar -C / -xzf -
+RUN apk add --update nodejs nodejs-npm make g++ git sqlite-dev
+RUN npm install -g less less-plugin-clean-css
+RUN go get -u github.com/jteeuwen/go-bindata/...
+
+RUN mkdir -p /go/src/github.com/writeas
+RUN git clone https://github.com/writeas/writefreely.git /go/src/github.com/writeas/writefreely -b ${WRITEFREELY_VERSION}
+WORKDIR /go/src/github.com/writeas/writefreely
+
+ENV GO111MODULE=on
+RUN make build \
+  && make ui
+RUN mkdir /stage && \
+  cp -R /go/bin \
+  /go/src/github.com/writeas/writefreely/templates \
+  /go/src/github.com/writeas/writefreely/static \
+  /go/src/github.com/writeas/writefreely/pages \
+  /go/src/github.com/writeas/writefreely/keys \
+  /go/src/github.com/writeas/writefreely/cmd \
+  /stage && \
+  mv /stage/cmd/writefreely/writefreely /stage
 
 # Final image
-FROM debian:stable-slim AS production
+FROM alpine:3.11
 
-COPY --from=build /writefreely /writefreely
+RUN apk add --no-cache openssl ca-certificates
+COPY --from=build --chown=daemon:daemon /stage /writefreely
 COPY bin/writefreely-docker.sh /writefreely/
 
 WORKDIR /writefreely
