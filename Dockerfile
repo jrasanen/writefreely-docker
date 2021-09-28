@@ -14,13 +14,15 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+ARG GOLANG_VERSION=1.17
+
 # Build image
-FROM golang:1.13-alpine as build
+FROM golang:${GOLANG_VERSION}-alpine as build
 
 ARG WRITEFREELY_VERSION=v0.13.1
 ARG WRITEFREELY_FORK=writeas/writefreely
 
-RUN apk add --update nodejs nodejs-npm make g++ git sqlite-dev
+RUN apk add --update nodejs npm make g++ git sqlite-dev
 RUN npm install -g less less-plugin-clean-css
 RUN go get -u github.com/jteeuwen/go-bindata/...
 
