@@ -17,7 +17,7 @@
 # Build image
 FROM golang:1.13-alpine as build
 
-ARG WRITEFREELY_VERSION=v0.12.0
+ARG WRITEFREELY_VERSION=v0.13.1
 ARG WRITEFREELY_FORK=writeas/writefreely
 
 RUN apk add --update nodejs nodejs-npm make g++ git sqlite-dev
