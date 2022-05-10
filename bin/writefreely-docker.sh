@@ -21,36 +21,15 @@ cd /data
 
 WRITEFREELY=/writefreely/writefreely
 
-if [ -e ./config.ini ] && [ -e ./writefreely.db ] && [ -e ./keys/email.aes256 ]; then
-    BACKUP="writefreely.$(date +%s).db"
-    cp writefreely.db ${BACKUP}
+if [ -e ./config.ini ] && [ -e ./keys/email.aes256 ]; then
     ${WRITEFREELY} -migrate
-    if cmp writefreely.db ${BACKUP}; then
-        rm ${BACKUP}
-    else
-        echo "Database backed up at /data/${BACKUP}"
-    fi
     exec ${WRITEFREELY}
 fi
 
 if [ -e ./config.ini ]; then
-    if [ ! -s ./writefreely.db ]; then
-        ${WRITEFREELY} -init-db
-    fi
-    if [ ! -e ./keys/email.aes256 ]; then
-        ${WRITEFREELY} -gen-keys
-    fi
-
-    BACKUP="writefreely.$(date +%s).db"
-    cp writefreely.db ${BACKUP}
-    ${WRITEFREELY} -migrate
-    if cmp writefreely.db ${BACKUP}; then
-        rm ${BACKUP}
-    else
-        echo "Database backed up at /data/${BACKUP}"
-    fi
+    ${WRITEFREELY} -init-db
+    ${WRITEFREELY} -gen-keys
     exec ${WRITEFREELY}
-
 fi
 
 WRITEFREELY_BIND_PORT="${WRITEFREELY_BIND_PORT:-8080}"
@@ -70,17 +49,16 @@ pages_parent_dir     = /writefreely
 keys_parent_dir      =
 
 [database]
-type     = sqlite3
-filename = writefreely.db
-username =
-password =
-database =
-host     = localhost
+type     = mysql
+username = ${WRITEFREELY_DATABASE_USERNAME}
+password = ${WRITEFREELY_DATABASE_PASSWORD}
+database = ${WRITEFREELY_DATABASE_NAME}
+host     = ${WRITEFREELY_DATABASE_HOST}
 port     = 3306
 
 [app]
 site_name         = ${WRITEFREELY_SITE_NAME}
-site_description  =
+site_description  = 
 host              = ${WRITEFREELY_HOST:-http://${WRITEFREELY_BIND_HOST}:${WRITEFREELY_BIND_PORT}}
 theme             = write
 disable_js        = false
