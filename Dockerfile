@@ -14,7 +14,7 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-ARG GOLANG_VERSION=1.18
+ARG GOLANG_VERSION=1.17
 
 # Build image
 FROM golang:${GOLANG_VERSION}-alpine as build
