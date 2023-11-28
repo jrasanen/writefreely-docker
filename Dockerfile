@@ -14,12 +14,12 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-ARG GOLANG_VERSION=1.17
+ARG GOLANG_VERSION=1.21
 
 # Build image
 FROM golang:${GOLANG_VERSION}-alpine as build
 
-ARG WRITEFREELY_VERSION=v0.13.1
+ARG WRITEFREELY_VERSION=v0.14.0
 ARG WRITEFREELY_FORK=writeas/writefreely
 
 RUN apk add --update nodejs npm make g++ git sqlite-dev
@@ -44,7 +44,7 @@ RUN mkdir /stage && \
   mv /stage/cmd/writefreely/writefreely /stage
 
 # Final image
-FROM alpine:3.11
+FROM alpine:3.18
 
 RUN apk add --no-cache openssl ca-certificates
 COPY --from=build --chown=daemon:daemon /stage /writefreely
