@@ -49,5 +49,3 @@ USER daemon
 
 ENTRYPOINT ["/writefreely/writefreely-docker.sh"]
 
-HEALTHCHECK --start-period=5s --interval=15s --timeout=5s \
-    CMD curl -fSs http://localhost:8080/ || exit 1
