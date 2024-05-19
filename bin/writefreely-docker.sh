@@ -35,6 +35,7 @@ fi
 WRITEFREELY_BIND_PORT="${WRITEFREELY_BIND_PORT:-8080}"
 WRITEFREELY_BIND_HOST="${WRITEFREELY_BIND_HOST:-0.0.0.0}"
 WRITEFREELY_SITE_NAME="${WRITEFREELY_SITE_NAME:-A Writefreely blog}"
+WRITEFREELY_SITE_DESCRIPTION="${WRITEFREELY_SITE_DESCRIPTION:-My Writefreely blog}"
 
 cat >./config.ini <<EOF
 [server]
@@ -49,16 +50,16 @@ pages_parent_dir     = /writefreely
 keys_parent_dir      =
 
 [database]
-type     = mysql
+type     = ${WRITEFREELY_DATABASE_DATABASE}
 username = ${WRITEFREELY_DATABASE_USERNAME}
 password = ${WRITEFREELY_DATABASE_PASSWORD}
 database = ${WRITEFREELY_DATABASE_NAME}
 host     = ${WRITEFREELY_DATABASE_HOST}
-port     = 3306
+port     = ${WRITEFREELY_DATABASE_PORT}
 
 [app]
 site_name         = ${WRITEFREELY_SITE_NAME}
-site_description  = 
+site_description  = ${WRITEFREELY_SITE_DESCRIPTION}
 host              = ${WRITEFREELY_HOST:-http://${WRITEFREELY_BIND_HOST}:${WRITEFREELY_BIND_PORT}}
 theme             = write
 disable_js        = false
@@ -77,4 +78,5 @@ EOF
 
 ${WRITEFREELY} --init-db
 ${WRITEFREELY} --gen-keys
+
 exec ${WRITEFREELY}
