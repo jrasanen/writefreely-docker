@@ -52,7 +52,5 @@ jobs:
           file: ./Dockerfile
           push: true
           labels: ${{ steps.meta.outputs.labels }}
-          tags: |
-            ${{ steps.meta.outputs.tags }}
-            ${{ env.DOCKERHUB_REPO }}:latest
+          tags: ${{ steps.meta.outputs.tags }}
           platforms: linux/amd64,linux/arm64
