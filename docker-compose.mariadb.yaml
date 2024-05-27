@@ -1,0 +1,35 @@
+services:
+  writefreely-web:
+    container_name: writefreely-web
+    image: gmag11/writefreely:latest
+    build:
+      context: .
+    init: true
+    env_file:
+      - .env.mariadb
+    volumes:
+      - ./data:/data
+    ports:
+      - 8080:8080
+    depends_on:
+      writefreely-db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  writefreely-db:
+    container_name: writefreely-db
+    image: mariadb:latest
+    init: true
+    volumes:
+      - ./db-data:/var/lib/mysql
+    networks:
+      - internal
+    env_file:
+      - .env.mariadb
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "mariadb-admin ping -h localhost -u${MARIADB_USER} -p${MARIADB_PASSWORD} || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
