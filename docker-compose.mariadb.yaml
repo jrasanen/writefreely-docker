@@ -22,8 +22,6 @@ services:
     init: true
     volumes:
       - ./db-data:/var/lib/mysql
-    networks:
-      - internal
     env_file:
       - .env.mariadb
     restart: unless-stopped
