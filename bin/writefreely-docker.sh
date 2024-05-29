@@ -23,6 +23,10 @@ WRITEFREELY=/writefreely/writefreely
 attempts=0
 max_attempts=5
 
+log() {
+  echo "$(date '+%Y/%m/%d %H:%M:%S') $1"
+}
+
 validate_url() {
   URL="$1"
   if echo "$URL" | grep -Eq "^https?://[a-zA-Z0-9._-]+"; then
@@ -32,37 +36,69 @@ validate_url() {
   fi
 }
 
-# Validate WRITEFREELY_HOST
-if ! validate_url "$WRITEFREELY_HOST"; then
-  echo "Error: $WRITEFREELY_HOST is not a valid URL. It must start with http:// or https:// and be followed by a valid hostname."
+retry_command() {
+  local cmd=$1
+  attempts=0
+  until $cmd; do
+    attempts=$((attempts+1))
+    if [ $attempts -ge $max_attempts ]; then
+      log "Failed to execute '$cmd' after $attempts attempts."
+      return 1
+    fi
+    log "Retrying '$cmd' ($attempts/$max_attempts)..."
+    sleep 5
+  done
+  return 0
+}
+
+initialize_database() {
+  log "Initializing database..."
+  if ! retry_command "${WRITEFREELY} --init-db"; then
+    log "Initialization of database failed. Removing config.ini."
+    rm ./config.ini
+    exit 1
+  fi
+}
+
+generate_keys() {
+  log "Generating keys..."
+  ${WRITEFREELY} --gen-keys
+}
+
+create_admin_user() {
+  if [ -n "$WRITEFREELY_ADMIN_USER" ]; then
+    ${WRITEFREELY} user create --admin ${WRITEFREELY_ADMIN_USER}:${WRITEFREELY_ADMIN_PASSWORD}
+    log "Created admin user ${WRITEFREELY_ADMIN_USER}"
+  else
+    log "Admin user not defined"
+    exit 1
+  fi
+}
+
+create_writer_user() {
+  if [ -n "$WRITEFREELY_WRITER_USER" ]; then
+    ${WRITEFREELY} user create ${WRITEFREELY_WRITER_USER}:${WRITEFREELY_WRITER_PASSWORD}
+    log "Created writer user ${WRITEFREELY_WRITER_USER}"
+  fi
+}
+
+validate_url "$WRITEFREELY_HOST" || {
+  log "Error: $WRITEFREELY_HOST is not a valid URL. It must start with http:// or https:// and be followed by a valid hostname."
   exit 1
-fi
+}
 
 if [ -e ./config.ini ] && [ -e ./keys/email.aes256 ]; then
-    ${WRITEFREELY} -migrate
-    exec ${WRITEFREELY}
+  log "Migration required. Running migration..."
+  ${WRITEFREELY} -migrate
+  exec ${WRITEFREELY}
 fi
 
 if [ -e ./config.ini ]; then
-    until ${WRITEFREELY} --init-db; do
-        attempts=$((attempts+1))
-        if [ $attempts -ge $max_attempts ]; then
-            echo "Failed to initialize database after $attempts attempts."
-            exit 1
-        fi
-        echo "Retrying --init-db ($attempts/$max_attempts)..."
-        sleep 5
-    done
-    echo "Generating keys..."
-    ${WRITEFREELY} -gen-keys
-    if [ -n "$WRITEFREELY_ADMIN_USER" ]; then
-        ${WRITEFREELY} user create --admin ${WRITEFREELY_ADMIN_USER}:${WRITEFREELY_ADMIN_PASSWORD}
-        echo Created user ${WRITEFREELY_ADMIN_USER}
-    else
-        echo Admin user not defined
-        exit 1
-    fi
-    exec ${WRITEFREELY}
+  initialize_database
+  generate_keys
+  create_admin_user
+  create_writer_user
+  exec ${WRITEFREELY}
 fi
 
 WRITEFREELY_BIND_PORT="${WRITEFREELY_BIND_PORT:-8080}"
@@ -179,33 +215,9 @@ EOF
 
 chmod 600 ./config.ini
 
-# Retry --init-db until it succeeds
-echo "Initializing database..."
-until ${WRITEFREELY} --init-db; do
-  attempts=$((attempts+1))
-  if [ $attempts -ge $max_attempts ]; then
-    echo "Failed to initialize database after $attempts attempts."
-    rm ./config.ini
-    exit 1
-  fi
-  echo "Retrying --init-db ($attempts/$max_attempts)..."
-  sleep 5
-done
-
-echo "Generating keys..."
-${WRITEFREELY} --gen-keys
-
-if [ -n "$WRITEFREELY_ADMIN_USER" ]; then
-  ${WRITEFREELY} user create --admin ${WRITEFREELY_ADMIN_USER}:${WRITEFREELY_ADMIN_PASSWORD}
-  echo Created user ${WRITEFREELY_ADMIN_USER}
-else
-  echo Admin user not defined
-  exit 1
-fi
-
-if [ -n "$WRITEFREELY_WRITER_USER" ]; then
-  ${WRITEFREELY} user create ${WRITEFREELY_WRITER_USER}:${WRITEFREELY_WRITER_PASSWORD}
-  echo Created user ${WRITEFREELY_WRITER_USER}
-fi
+initialize_database
+generate_keys
+create_admin_user
+create_writer_user
 
 exec ${WRITEFREELY}
