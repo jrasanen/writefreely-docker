@@ -54,7 +54,7 @@ gopher_port           = 0
 
 [database]
 type                  = ${WRITEFREELY_DATABASE_DATABASE}
-filename              = ${WRITEFREELY_SQLITE_FILENAME:-./writefreely.db}
+filename              = ${WRITEFREELY_SQLITE_FILENAME:-/data/writefreely.db}
 username              = ${WRITEFREELY_DATABASE_USERNAME}
 password              = ${WRITEFREELY_DATABASE_PASSWORD}
 database              = ${WRITEFREELY_DATABASE_NAME}
