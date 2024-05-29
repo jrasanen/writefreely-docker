@@ -6,7 +6,7 @@ services:
       context: .
     init: true
     env_file:
-      - .env.mariadb
+      - .env
     volumes:
       - ./data:/data
     ports:
@@ -22,7 +22,7 @@ services:
     volumes:
       - ./db-data:/var/lib/mysql
     env_file:
-      - .env.mariadb
+      - .env
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "mariadb-admin ping -h localhost -u${MARIADB_USER} -p${MARIADB_PASSWORD} || exit 1"]

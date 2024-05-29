@@ -73,7 +73,46 @@ git clone https://github.com/yourusername/writefreely-docker.git
 cd writefreely-docker
 ```
 
-#### MariaDB
+#### Prepare the Data Directory
+
+Create the data directory and assign the appropriate permissions:
+
+```bash
+mkdir data
+sudo chown 1000:1000 data
+```
+
+#### Configure the Environment
+
+Before starting the services, you need to copy the appropriate .env file and edit it to configure the environment variables, especially the passwords.
+
+##### For MariaDB
+
+Copy the .env.mariadb file to .env:
+
+```bash
+cp .env.mariadb .env
+```
+
+##### For SQLite
+
+Copy the .env.sqlite file to .env:
+
+```bash
+cp .env.sqlite .env
+```
+
+Then, edit the .env file to set the appropriate values for your environment:
+
+```bash
+nano .env
+```
+
+Ensure to set secure passwords and other necessary configuration options.
+
+#### Start the Services
+
+##### MariaDB
 
 To use the **MariaDB** configuration, run:
 
@@ -81,7 +120,7 @@ To use the **MariaDB** configuration, run:
 docker-compose -f docker-compose.mariadb.yaml up
 ```
 
-#### SQLite
+##### SQLite
 
 To use the **SQLite** configuration, run:
 
@@ -98,3 +137,7 @@ docker build -t yourusername/writefreely .
 ```
 
 Replace `yourusername` with your Docker Hub username or a suitable image name.
+
+### Contributing
+
+Contributions are welcome! Please fork this repository and submit pull requests for any enhancements or bug fixes.

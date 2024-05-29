@@ -6,7 +6,7 @@ services:
       context: .
     init: true
     env_file:
-      - .env.sqlite
+      - .env
     volumes:
       - ./data:/data
     ports:
