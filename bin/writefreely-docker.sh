@@ -21,13 +21,31 @@ cd /data
 
 WRITEFREELY=/writefreely/writefreely
 
+validate_url() {
+  URL="$1"
+  if echo "$URL" | grep -Eq "^https?://[a-zA-Z0-9._-]+"; then
+    return 0  # Success
+  else
+    return 1  # Failure
+  fi
+}
+
+# Validate WRITEFREELY_HOST
+if ! validate_url "$WRITEFREELY_HOST"; then
+  echo "Error: $WRITEFREELY_HOST is not a valid URL. It must start with http:// or https:// and be followed by a valid hostname."
+  exit 1
+fi
+
 if [ -e ./config.ini ] && [ -e ./keys/email.aes256 ]; then
     ${WRITEFREELY} -migrate
     exec ${WRITEFREELY}
 fi
 
 if [ -e ./config.ini ]; then
-    ${WRITEFREELY} -init-db
+    until ${WRITEFREELY} --init-db; do
+        echo "Retrying --init-db..."
+        sleep 5
+    done
     ${WRITEFREELY} -gen-keys
     exec ${WRITEFREELY}
 fi
@@ -146,7 +164,12 @@ EOF
 
 chmod 600 ./config.ini
 
-${WRITEFREELY} --init-db
+# Retry --init-db until it succeeds
+until ${WRITEFREELY} --init-db; do
+  echo "Retrying --init-db..."
+  sleep 5
+done
+
 ${WRITEFREELY} --gen-keys
 
 if [ -n "$WRITEFREELY_ADMIN_USER" ]; then
