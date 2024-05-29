@@ -7,7 +7,7 @@ LABEL org.opencontainers.image.source="https://github.com/writefreely/writefreel
 LABEL org.opencontainers.image.description="WriteFreely is a clean, minimalist publishing platform made for writers. Start a blog, share knowledge within your organization, or build a community around the shared act of writing."
 
 ARG WRITEFREELY_VERSION=v0.15.0
-ARG WRITEFREELY_FORK=writeas/writefreely
+ARG WRITEFREELY_FORK=writefreely/writefreely
 
 RUN apk -U upgrade \
     && apk add --no-cache nodejs npm make g++ git sqlite-dev \
@@ -38,14 +38,23 @@ RUN mkdir /stage && \
 # Final image
 FROM alpine:3.19
 
+ARG WRITEFREELY_UID=1000
+ARG WRITEFREELY_GID=1000
+
 RUN apk -U upgrade && apk add --no-cache openssl ca-certificates
+
+RUN addgroup -g ${WRITEFREELY_GID} -S writefreely && adduser -u ${WRITEFREELY_UID} -S -G writefreely writefreely
+
 COPY --from=build --chown=daemon:daemon /stage /writefreely
 COPY bin/writefreely-docker.sh /writefreely/
 
 WORKDIR /writefreely
 VOLUME /data
 EXPOSE 8080
-USER daemon
+
+RUN chown -R writefreely:writefreely /writefreely
+
+USER writefreely
 
 ENTRYPOINT ["/writefreely/writefreely-docker.sh"]
 
