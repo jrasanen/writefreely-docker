@@ -12,8 +12,7 @@ services:
     ports:
       - 8080:8080
     depends_on:
-      writefreely-db:
-        condition: service_healthy
+      - writefreely-db
     restart: unless-stopped
 
   writefreely-db:
@@ -30,4 +29,4 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
-      start_period: 30s
+      start_period: 10s
