@@ -1,7 +1,7 @@
 services:
   writefreely-web:
     container_name: writefreely-web
-    image: gmag11/writefreely:latest
+    image: jrasanen/writefreely:latest
     build:
       context: .
     init: true
