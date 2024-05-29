@@ -20,6 +20,8 @@ set -e
 cd /data
 
 WRITEFREELY=/writefreely/writefreely
+attempts=0
+max_attempts=5
 
 validate_url() {
   URL="$1"
@@ -43,10 +45,23 @@ fi
 
 if [ -e ./config.ini ]; then
     until ${WRITEFREELY} --init-db; do
-        echo "Retrying --init-db..."
+        attempts=$((attempts+1))
+        if [ $attempts -ge $max_attempts ]; then
+            echo "Failed to initialize database after $attempts attempts."
+            exit 1
+        fi
+        echo "Retrying --init-db ($attempts/$max_attempts)..."
         sleep 5
     done
+    echo "Generating keys..."
     ${WRITEFREELY} -gen-keys
+    if [ -n "$WRITEFREELY_ADMIN_USER" ]; then
+        ${WRITEFREELY} user create --admin ${WRITEFREELY_ADMIN_USER}:${WRITEFREELY_ADMIN_PASSWORD}
+        echo Created user ${WRITEFREELY_ADMIN_USER}
+    else
+        echo Admin user not defined
+        exit 1
+    fi
     exec ${WRITEFREELY}
 fi
 
@@ -165,11 +180,19 @@ EOF
 chmod 600 ./config.ini
 
 # Retry --init-db until it succeeds
+echo "Initializing database..."
 until ${WRITEFREELY} --init-db; do
-  echo "Retrying --init-db..."
+  attempts=$((attempts+1))
+  if [ $attempts -ge $max_attempts ]; then
+    echo "Failed to initialize database after $attempts attempts."
+    rm ./config.ini
+    exit 1
+  fi
+  echo "Retrying --init-db ($attempts/$max_attempts)..."
   sleep 5
 done
 
+echo "Generating keys..."
 ${WRITEFREELY} --gen-keys
 
 if [ -n "$WRITEFREELY_ADMIN_USER" ]; then
@@ -179,6 +202,7 @@ else
   echo Admin user not defined
   exit 1
 fi
+
 if [ -n "$WRITEFREELY_WRITER_USER" ]; then
   ${WRITEFREELY} user create ${WRITEFREELY_WRITER_USER}:${WRITEFREELY_WRITER_PASSWORD}
   echo Created user ${WRITEFREELY_WRITER_USER}
