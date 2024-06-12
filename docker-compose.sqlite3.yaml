@@ -1,0 +1,15 @@
+services:
+  writefreely-web:
+    container_name: writefreely-web
+    image: jrasanen/writefreely:latest
+    build:
+      context: .
+    init: true
+    env_file:
+      - .env
+    volumes:
+      - ./data:/data
+    ports:
+      - 8080:8080
+    restart: unless-stopped
+

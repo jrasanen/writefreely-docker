@@ -2,7 +2,7 @@
 
 This project builds a Docker image for [WriteFreely](https://github.com/writefreely/writefreely), a minimalist, privacy-focused, and federated blogging platform. The image is uses on Alpine Linux.
 
-## Getting s tarted
+## Getting started
 
 To get started, the easiest way to test it out is running the following command:
 
@@ -31,6 +31,7 @@ The following variables will be used to construct the `config.ini` on first star
 ## Database Configuration
 
 - **`WRITEFREELY_DATABASE_DATABASE`**: Specifies the type of database used, such as `mysql` or `sqlite3`.
+- **`WRITEFREELY_SQLITE_FILENAME`**: (Optional) DB filename if `sqlite3` detabase is selected. Defaults to `/data/writefreely.db`.
 - **`WRITEFREELY_DATABASE_USERNAME`**: The username for the database.
 - **`WRITEFREELY_DATABASE_PASSWORD`**: The password for the database.
 - **`WRITEFREELY_DATABASE_NAME`**: The name of the database to connect to.
@@ -50,6 +51,93 @@ The following variables will be used to construct the `config.ini` on first star
 - **`WRITEFREELY_LOCAL_TIMELINE`**: Whether or not the instance reader (and the Public option on blogs) is enabled
 - **`WRITEFREELY_USER_INVITES`**: Who is allowed to send user invites, if anyone. A blank value disables invites for all users. Valid choices: empty, user, or admin
 
+## Writefreely Users
+
+- **`WRITEFREELY_ADMIN_USER`**: Administrator user name. In single user instances is editor too.
+- **`WRITEFREELY_ADMIN_PASSWORD`**: Administrator password
+
 ### Volumes
 
 * `/data`: Directory where WriteFreely stores its data, including database files and configuration.
+
+### Using Docker Compose
+
+You can use Docker Compose to set up WriteFreely with different database configurations. The configuration files are already included in this repository. Follow the steps below to start the services.
+
+#### Clone the Repository
+
+First, clone this repository:
+
+```bash
+git clone https://github.com/yourusername/writefreely-docker.git
+cd writefreely-docker
+```
+
+#### Prepare the Data Directory
+
+Create the data directory and assign the appropriate permissions:
+
+```bash
+mkdir data
+sudo chown 1000:1000 data
+```
+
+#### Configure the Environment
+
+Before starting the services, you need to copy the appropriate .env file and edit it to configure the environment variables, especially the passwords.
+
+##### For MariaDB
+
+Copy the .env.mariadb file to .env:
+
+```bash
+cp .env.mariadb .env
+```
+
+##### For SQLite
+
+Copy the .env.sqlite file to .env:
+
+```bash
+cp .env.sqlite .env
+```
+
+Then, edit the .env file to set the appropriate values for your environment:
+
+```bash
+nano .env
+```
+
+Ensure to set secure passwords and other necessary configuration options.
+
+#### Start the Services
+
+##### MariaDB
+
+To use the **MariaDB** configuration, run:
+
+```bash
+docker-compose -f docker-compose.mariadb.yaml up
+```
+
+##### SQLite
+
+To use the **SQLite** configuration, run:
+
+```bash
+docker-compose -f docker-compose.sqlite3.yaml up
+```
+
+### Building the Image
+
+If you want to build the image yourself, clone this repository and run the following command inside the repository's directory:
+
+```bash
+docker build -t yourusername/writefreely .
+```
+
+Replace `yourusername` with your Docker Hub username or a suitable image name.
+
+### Contributing
+
+Contributions are welcome! Please fork this repository and submit pull requests for any enhancements or bug fixes.
