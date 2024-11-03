@@ -6,7 +6,7 @@ FROM golang:${GOLANG_VERSION}-alpine as build
 LABEL org.opencontainers.image.source="https://github.com/writefreely/writefreely"
 LABEL org.opencontainers.image.description="WriteFreely is a clean, minimalist publishing platform made for writers. Start a blog, share knowledge within your organization, or build a community around the shared act of writing."
 
-ARG WRITEFREELY_VERSION=v0.15.0
+ARG WRITEFREELY_VERSION=v0.15.1
 ARG WRITEFREELY_FORK=writefreely/writefreely
 
 RUN apk -U upgrade \
