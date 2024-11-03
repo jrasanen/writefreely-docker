@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  WRITEFREELY_VERSION: v0.15.0
+  WRITEFREELY_VERSION: v0.15.1
   DOCKERHUB_REPO: jrasanen/writefreely
 
 jobs:
